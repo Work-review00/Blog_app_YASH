@@ -1,4 +1,6 @@
+import 'package:blog_app/core/common/widgets/loader.dart';
 import 'package:blog_app/core/theme/app_pallete.dart';
+import 'package:blog_app/core/utils/show_snackbar.dart';
 import 'package:blog_app/feature/auth/presentaion/bloc/auth_bloc.dart';
 import 'package:blog_app/feature/auth/presentaion/pages/login_page.dart';
 import 'package:blog_app/feature/auth/widgets/auth_field.dart';
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class SignUpPage extends StatefulWidget {
+  static route() => MaterialPageRoute(builder: (context) => const SignUpPage());
   const SignUpPage({super.key});
 
   @override
@@ -14,11 +17,10 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final formKey = GlobalKey<FormState>();
-
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final nameController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -31,149 +33,82 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthFailure) {
+              showSnackbar(context, state.message);
+            }
+          },
+          builder: (context, state) {
+            if (state is AuthLoading) {
+              return const Loader();
+            }
 
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final screenWidth = constraints.maxWidth;
-            final screenHeight = constraints.maxHeight;
-
-            // Detect keyboard height
-            final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
-
-            // Responsive horizontal padding
-            final horizontalPadding = screenWidth < 400
-                ? 15.0
-                : screenWidth < 600
-                ? 20.0
-                : 30.0;
-
-            // Responsive title size
-            final titleFontSize = screenWidth < 400
-                ? 38.0
-                : screenWidth < 600
-                ? 45.0
-                : 50.0;
-
-            // Reduce top spacing when keyboard is open
-            final topSpacing = keyboardHeight > 0
-                ? 20.0
-                : screenHeight < 700
-                ? 30.0
-                : 60.0;
-
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                20,
-                horizontalPadding,
-                keyboardHeight + 30,
-              ),
-
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 500),
-
-                  child: Form(
-                    key: formKey,
-
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(height: topSpacing),
-
-                        // Title
-                        Text(
-                          'Sign Up',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: titleFontSize,
-                            fontWeight: FontWeight.bold,
+            return Form(
+              key: formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    'Sign Up.',
+                    style: TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 30),
+                  AuthField(hintText: 'Name', controller: nameController),
+                  const SizedBox(height: 15),
+                  AuthField(hintText: 'Email', controller: emailController),
+                  const SizedBox(height: 15),
+                  AuthField(
+                    hintText: 'Password',
+                    controller: passwordController,
+                    isObscureText: true,
+                  ),
+                  const SizedBox(height: 20),
+                  AuthGradientButton(
+                    buttonText: 'Sign Up',
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        context.read<AuthBloc>().add(
+                          AuthSignUp(
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                            name: nameController.text.trim(),
                           ),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
                         ),
-
-                        const SizedBox(height: 25),
-
-                        // Name
-                        AuthField(hintText: 'Name', controller: nameController),
-
-                        const SizedBox(height: 15),
-
-                        // Email
-                        AuthField(
-                          hintText: 'Email',
-                          controller: emailController,
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        // Password
-                        AuthField(
-                          hintText: 'Password',
-                          controller: passwordController,
-                          isObscureText: true,
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Sign Up Button
-                        AuthGradientButton(
-                          buttonText: 'Sign Up',
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              context.read<AuthBloc>().add(
-                                AuthSignUp(
-                                  email: emailController.text.trim(),
-                                  password: passwordController.text.trim(),
-                                  name: nameController.text.trim(),
+                      );
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: 'Already have an account? ',
+                        style: Theme.of(context).textTheme.titleMedium,
+                        children: [
+                          TextSpan(
+                            text: 'Sign In',
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: AppPallete.gradient2,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              );
-                            }
-                          },
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        // Login Navigation
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const LoginPage(),
-                              ),
-                            );
-                          },
-
-                          child: RichText(
-                            textAlign: TextAlign.center,
-
-                            text: TextSpan(
-                              text: "Already have an account? ",
-
-                              style: Theme.of(context).textTheme.titleMedium,
-
-                              children: [
-                                TextSpan(
-                                  text: 'Sign In',
-
-                                  style: Theme.of(context).textTheme.titleMedium
-                                      ?.copyWith(
-                                        color: AppPallete.gradient2,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             );
           },
