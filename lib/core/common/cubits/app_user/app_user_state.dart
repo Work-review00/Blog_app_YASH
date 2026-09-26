@@ -1,7 +1,6 @@
-part of 'app_user_cubit.dart';
+import '../../../entity/user.dart';
 
-@immutable
-sealed class AppUserState {}
+abstract class AppUserState {}
 
 final class AppUserInitial extends AppUserState {}
 

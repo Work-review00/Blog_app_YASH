@@ -6,11 +6,16 @@ abstract interface class AuthRepository {
   Future<Either<Failure, User>> signUpWithEmailPassword({
     required String email,
     required String password,
-    required name,
+    required String name,
   });
+
   Future<Either<Failure, User>> loginWithEmailPassword({
     required String email,
     required String password,
   });
+
   Future<Either<Failure, User>> currentUser();
+
+  // Added the logout contract
+  Future<Either<Failure, void>> logout();
 }

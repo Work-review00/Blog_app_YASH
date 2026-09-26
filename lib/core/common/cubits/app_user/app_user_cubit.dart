@@ -1,8 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:blog_app/core/entity/user.dart';
-import 'package:flutter/material.dart';
 
-part 'app_user_state.dart';
+import 'app_user_state.dart';
 
 class AppUserCubit extends Cubit<AppUserState> {
   AppUserCubit() : super(AppUserInitial());
